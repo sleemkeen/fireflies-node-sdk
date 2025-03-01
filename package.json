@@ -1,0 +1,35 @@
+{
+  "name": "@fireflies/node-sdk",
+  "version": "1.0.0",
+  "description": "Node.js SDK for Fireflies.ai API",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "fireflies",
+    "transcription",
+    "api",
+    "sdk",
+    "meetings"
+  ],
+  "author": "Fireflies.ai",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.7",
+    "dotenv": "^16.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.16",
+    "typescript": "^5.3.3",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.11",
+    "ts-jest": "^29.1.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
