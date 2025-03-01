@@ -1,6 +1,6 @@
 {
   "name": "fireflies-node-sdk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Node.js SDK for Fireflies.ai API",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -56,5 +56,12 @@
   "bugs": {
     "url": "https://github.com/sleemkeen/fireflies-node-sdk/issues"
   },
-  "homepage": "https://github.com/sleemkeen/fireflies-node-sdk#readme"
+  "homepage": "https://github.com/sleemkeen/fireflies-node-sdk#readme",
+  "type": "module",
+  "exports": {
+    ".": {
+      "require": "./dist/cjs/index.js",
+      "import": "./dist/esm/index.js"
+    }
+  }
 }
