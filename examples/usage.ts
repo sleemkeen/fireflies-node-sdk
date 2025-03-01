@@ -191,7 +191,7 @@ class FirefliesUsageExamples {
 // Example usage:
 async function main() {
   try {
-    const examples = new FirefliesUsageExamples('58ac7ad2bd03893661637acba4bba3ab');
+    const examples = new FirefliesUsageExamples('');
     
     // const userFields = ["user_id", "email", "name", "num_transcripts"];
     const meetingFields = ["privacy", "id"];
