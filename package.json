@@ -1,10 +1,10 @@
 {
   "name": "fireflies-node-sdk",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Node.js SDK for Fireflies.ai API",
-  "main": "dist/cjs/index.js",
+  "main": "dist/index.js",
   "module": "dist/esm/index.js",
-  "types": "dist/esm/index.d.ts",
+  "types": "dist/index.d.ts",
   "scripts": {
    "build": "npm run build:esm && npm run build:cjs",
     "build:esm": "tsc",
