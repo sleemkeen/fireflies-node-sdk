@@ -1,6 +1,6 @@
 {
   "name": "fireflies-node-sdk",
-  "version": "1.0.2",
+  "version": "1.0.6",
   "description": "Node.js SDK for Fireflies.ai API",
   "main": "dist/index.js",
   "module": "dist/esm/index.js",
@@ -9,6 +9,7 @@
    "build": "npm run build:esm && npm run build:cjs",
     "build:esm": "tsc",
     "build:cjs": "tsc --module commonjs --outDir dist/cjs",
+    "publish": "npm run build && npm publish --access public",
     "test": "jest --config jestconfig.json",
     "lint": "eslint \"{**/*,*}.{js,ts,jsx,tsx}\"",
     "prettier": "prettier --write \"{src,tests,example/src}/**/*.{js,ts,jsx,tsx}\""
