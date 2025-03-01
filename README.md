@@ -23,11 +23,11 @@ const fireflies = new FirefliesSDK({
 
 async function main() {
   try {
-    // Get current user info
+    // Get current user info - see docs.fireflies.ai for all available fields
     const userInfo = await fireflies.getCurrentUser(['email', 'name']);
     console.log('User:', userInfo);
 
-    // Get recent transcripts
+    // Get recent transcripts - see docs.fireflies.ai for all available fields
     const transcripts = await fireflies.getTranscripts(
       { limit: 10, mine: true },
       ['id', 'title']
@@ -70,13 +70,15 @@ FIREFLIES_API_KEY=your_api_key_here
 
 ## API Reference
 
+For a complete list of available fields and schema information, please refer to the [official Fireflies.ai documentation](https://docs.fireflies.ai).
+
 ### User Methods
 
 ```javascript
-// Get current user
+// Get current user - see docs.fireflies.ai for all available fields
 await fireflies.getCurrentUser(['email', 'name']);
 
-// Get user by ID
+// Get user by ID - see docs.fireflies.ai for all available fields
 await fireflies.getUser('user_id', ['email', 'name']);
 
 // Set user role
@@ -86,13 +88,13 @@ await fireflies.setUserRole('user_id', 'admin');
 ### Transcript Methods
 
 ```javascript
-// Get transcripts
+// Get transcripts - see docs.fireflies.ai for all available fields
 await fireflies.getTranscripts(
   { limit: 50, mine: true },
   ['id', 'title', 'privacy']
 );
 
-// Get single transcript
+// Get single transcript - see docs.fireflies.ai for all available fields
 await fireflies.getTranscript('transcript_id', ['id', 'title']);
 
 // Delete transcript
@@ -102,7 +104,7 @@ await fireflies.deleteTranscript('transcript_id');
 ### Bites Methods
 
 ```javascript
-// Get bites
+// Get bites - see docs.fireflies.ai for all available fields
 await fireflies.getBites(
   { mine: true, limit: 10 },
   ['id', 'name', 'status']
@@ -173,21 +175,8 @@ MIT
 
 ## Support
 
-- [Documentation](https://docs.fireflies.ai)
+- [Official Documentation](https://docs.fireflies.ai)
 - [API Reference](https://docs.fireflies.ai/graphql-api)
 - [Support Portal](https://help.fireflies.ai)
 - [GitHub Issues](https://github.com/fireflies-ai/node-sdk/issues)
 ```
-
-This README provides:
-1. Installation instructions
-2. Quick start examples
-3. Environment variables
-4. Feature overview
-5. API reference
-6. Error handling guidance
-7. Examples
-8. Development instructions
-9. Contributing and support information
-
-Would you like me to add or modify any sections?
