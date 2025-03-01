@@ -161,6 +161,7 @@ npm test
 npm run build
 ```
 
+
 ## Contributing
 
 1. Fork the repository
@@ -168,6 +169,11 @@ npm run build
 3. Commit your changes (`git commit -m 'Add amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
+
+## Credits
+
+- [Haruna Ahmadu](https://github.com/sleemkeen)
+- [All Contributors](../../contributors)
 
 ## License
 
