@@ -161,7 +161,6 @@ npm test
 npm run build
 ```
 
-
 ## Contributing
 
 1. Fork the repository
