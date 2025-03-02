@@ -172,6 +172,7 @@ npm run build
 ## Credits
 
 - [Haruna Ahmadu](https://github.com/sleemkeen)
+- [Peter Coates](https://github.com/petercoates)
 - [All Contributors](../../contributors)
 
 ## License

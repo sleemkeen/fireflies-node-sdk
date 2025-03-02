@@ -191,7 +191,7 @@ class FirefliesUsageExamples {
 // Example usage:
 async function main() {
   try {
-    const examples = new FirefliesUsageExamples('keyy');
+    const examples = new FirefliesUsageExamples('FIREFLIES_API_KEY');
     
     // const userFields = ["user_id", "email", "name", "num_transcripts"];
     const meetingFields = ["privacy", "id"];
