@@ -66,9 +66,9 @@ class FirefliesUsageExamples {
 
   async getBitesExamples() {
     // Get list of bites for the current user
-    const myBites = await this.fireflies.getBites({ 
+    const myBites = await this.fireflies.getBites({
       mine: true,
-      limit: 10 
+      limit: 10
     }, ["id", "name", "status", "end_time", "start_time", "media_type", "created_at"]);
     for (const bite of myBites) {
       console.log('Bite:', {
@@ -133,7 +133,6 @@ class FirefliesUsageExamples {
       end_time: 180,
       media_type: 'video',
       privacies: ['team', 'participants'],
-      summary: 'Key discussion about Q2 objectives'
     });
 
     console.log('Created new bite:', {
@@ -186,19 +185,117 @@ class FirefliesUsageExamples {
 
     return { liveMeetingResult, protectedMeetingResult };
   }
+
+  async getMultipleUserMeetingsExample() {
+    const apiKeys = [
+      'api-key-1',
+      'api-key-2',
+      'api-key-3'
+    ];
+
+    // Get meetings for multiple users with specific fields
+    const meetings = await FirefliesSDK.getMeetingsForMultipleUsers(
+      apiKeys,
+      [
+        'id',
+        'title',
+        'duration',
+        'date',
+        'host_email',
+        'organizer_email',
+        'summary { keywords action_items overview }'
+      ],
+      'json' // Output results to JSON files
+    );
+
+    // Log results summary
+    for (const [apiKey, result] of Object.entries(meetings)) {
+      console.log(`API Key ${apiKey.split('-')[0]}:`);
+      console.log(`- Meetings found: ${result.meetings.length}`);
+      console.log(`- Errors encountered: ${result.errors.length}`);
+    }
+
+    return meetings;
+  }
+
+  async findExternalParticipantQuestionsExample() {
+    try {
+      const { externalParticipants, questions } = await this.fireflies.findExternalParticipantQuestions('@yourcompany.com');
+
+      console.log('External Participants:', externalParticipants);
+      console.log('\nQuestions from External Participants:');
+      questions.forEach((question, index) => {
+        console.log(`${index + 1}. ${question}`);
+      });
+
+      return { externalParticipants, questions };
+    } catch (error) {
+      console.error('Error finding external participant questions:', error);
+      throw error;
+    }
+  }
+
+  async getMeetingVideosExample() {
+    try {
+      const meetings = await this.fireflies.getMeetingVideos();
+      let numHaveVideo = 0;
+
+      // Log the video URLs
+      meetings.forEach(meeting => {
+        console.log(
+          `${meeting.title} (${meeting.id}) meeting ${meeting.video_url
+            ? `has video \n\t- ${meeting.video_url}`
+            : `doesn't have a video`
+          }\n`
+        );
+        if (meeting.video_url) numHaveVideo += 1;
+      });
+
+      console.log(
+        `Found ${meetings.length} meetings to check for video. ${numHaveVideo} have a video`
+      );
+
+      return meetings;
+    } catch (error) {
+      console.error('Error getting meeting videos:', error);
+      throw error;
+    }
+  }
+
+  async getTranscriptSummaryExample(transcriptId: string) {
+    try {
+      const summary = await this.fireflies.getTranscriptSummary(transcriptId);
+
+      console.log('Meeting Summary:');
+      console.log('Overview:', summary.overview);
+      console.log('\nKey Points:');
+      console.log('- Meeting Type:', summary.meeting_type);
+      console.log('- Topics Discussed:', summary.topics_discussed.join(', '));
+      console.log('\nAction Items:');
+      summary.action_items.forEach((item, index) => {
+        console.log(`${index + 1}. ${item}`);
+      });
+      console.log('\nKeywords:', summary.keywords.join(', '));
+
+      return summary;
+    } catch (error) {
+      console.error('Error getting transcript summary:', error);
+      throw error;
+    }
+  }
 }
 
 // Example usage:
 async function main() {
   try {
-    const examples = new FirefliesUsageExamples('keyy');
-    
+    const examples = new FirefliesUsageExamples('your-api-key');
+
     // const userFields = ["user_id", "email", "name", "num_transcripts"];
     const meetingFields = ["privacy", "id"];
 
     // Test individual methods
     // let resp = await examples.getCurrentUser(userFields);
- 
+
     // let resp = await examples.getTranscripts({
     //   limit: 50,
     //   mine: true
@@ -211,7 +308,7 @@ async function main() {
     // console.log(resp);
 
     // let resp = await examples.getSpecificTranscriptBites('yGLC8RIcBaO');
-   
+
     // await examples.getSpecificTranscriptBites('your_transcript_id');
 
     // await examples.getTeamBites();
@@ -220,7 +317,10 @@ async function main() {
 
     // await examples.createBiteExamples('your_transcript_id');
     // await examples.addToLiveMeetingExamples();
-    
+
+    // Example of getting meetings for multiple users
+    await examples.getMultipleUserMeetingsExample();
+
   } catch (error) {
     console.error('Error:', error);
   }
