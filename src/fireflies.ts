@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import { generateGraphQLFilter, MeetingsHelper, BatchProcessResult } from './helper';
+import { generateGraphQLFilter, MeetingsHelper, BatchProcessResult } from './helper.js';
 import {
   FirefliesConfig,
   AIAppOutput,
@@ -465,10 +465,14 @@ export class FirefliesSDK {
     ];
 
     // Find questions from external participants by comparing speaker_name to email
+
     const questionsFromExternalParticipants = results
       .map(transcript =>
         transcript.sentences
           .filter(sentence => {
+            if (!sentence.speaker_name) {
+              return false;
+            }
             const regexPattern = new RegExp(
               '^' + sentence.speaker_name.split(' ')[0],
               'i'
