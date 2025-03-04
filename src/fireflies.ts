@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import { generateGraphQLFilter } from './helper';
+import { generateGraphQLFilter, MeetingsHelper, BatchProcessResult } from './helper.js';
 import {
   FirefliesConfig,
   AIAppOutput,
@@ -220,7 +220,7 @@ export class FirefliesSDK {
         }
       }
     `;
-    
+
     const response = await this.executeGraphQL<{ transcripts: TranscriptData[] }>(query, {
       ...params,
       hostEmail: params.host_email,
@@ -361,6 +361,205 @@ export class FirefliesSDK {
 
     const response = await this.executeGraphQL<{ addToLiveMeeting: AddToLiveMeetingResponse }>(query, input);
     return response.addToLiveMeeting;
+  }
+
+  /**
+   * Get meetings/transcripts for multiple users by providing a list of API keys.
+   * This implementation includes batch processing, rate limiting, and deduplication of meetings.
+   * @param apiKeys - Array of API keys for different users
+   * @param filter - Fields to include in the response
+   * @param outputType - Type of output ('console' or 'json')
+   * @returns Promise<{ [key: string]: BatchProcessResult }>
+   */
+  static async getMeetingsForMultipleUsers(
+    apiKeys: string[],
+    filter: string[] = [],
+    outputType: 'console' | 'json' = 'console'
+  ): Promise<{ [key: string]: BatchProcessResult }> {
+    if (!apiKeys.length) {
+      throw new Error('Please provide at least one API key');
+    }
+
+    const deduplicatedObj = await MeetingsHelper.getDedeuplicatedMeetingIds(apiKeys);
+    const results: { [key: string]: BatchProcessResult } = {};
+
+    for (const apiKey of Object.keys(deduplicatedObj)) {
+      const tasks = deduplicatedObj[apiKey].map(item => async () => {
+        const sdk = new FirefliesSDK({ apiKey });
+        return { data: { transcript: await sdk.getTranscript(item, filter) } };
+      });
+
+      try {
+        const result = await MeetingsHelper.batchProcess(tasks, apiKey);
+        results[apiKey] = result;
+
+        // Handle output
+        await MeetingsHelper.handleOutput(result, apiKey, outputType);
+      } catch (error) {
+        if (error instanceof Error) {
+          console.error(
+            `An error occurred while fetching meetings for apiKey: ${apiKey}`,
+            error.message
+          );
+        }
+        results[apiKey] = {
+          meetings: [],
+          errors: [error instanceof Error ? error.message : 'Unknown error']
+        };
+      }
+    }
+
+    return results;
+  }
+
+  /**
+   * Find questions asked by external participants in meetings
+   * @param companyEmailDomain - Your company email domain (e.g. '@company.com')
+   * @returns Promise<{ externalParticipants: string[], questions: string[] }>
+   */
+  async findExternalParticipantQuestions(companyEmailDomain: string): Promise<{
+    externalParticipants: string[];
+    questions: string[];
+  }> {
+    if (!companyEmailDomain.startsWith('@')) {
+      throw new Error('Company email domain must start with @');
+    }
+
+    const query = `
+      query Transcripts {
+        transcripts {
+          participants
+          sentences {
+            ai_filters {
+              question
+            }
+            speaker_name
+          }
+        }
+      }
+    `;
+
+    const response = await this.executeGraphQL<{
+      transcripts: Array<{
+        participants: string[];
+        sentences: Array<{
+          ai_filters: { question: string };
+          speaker_name: string;
+        }>;
+      }>
+    }>(query);
+
+    const results = response.transcripts;
+
+    // Find external participants by querying emails != companyEmailDomain
+    const externalParticipants = [
+      ...new Set(
+        results
+          .map(transcript =>
+            transcript.participants
+              .filter(participant => !participant.endsWith(companyEmailDomain))
+              .map(email => email.split('@')[0])
+          )
+          .flat()
+      )
+    ];
+
+    // Find questions from external participants by comparing speaker_name to email
+
+    const questionsFromExternalParticipants = results
+      .map(transcript =>
+        transcript.sentences
+          .filter(sentence => {
+            if (!sentence.speaker_name) {
+              return false;
+            }
+            const regexPattern = new RegExp(
+              '^' + sentence.speaker_name.split(' ')[0],
+              'i'
+            );
+
+            return (
+              externalParticipants.some(participant =>
+                regexPattern.test(participant)
+              ) &&
+              sentence.ai_filters.question &&
+              sentence.speaker_name
+            );
+          })
+          .map(
+            sentence =>
+              `${sentence.speaker_name}: ${sentence.ai_filters.question}`
+          )
+      )
+      .flat()
+      .filter(Boolean);
+
+    return {
+      externalParticipants,
+      questions: questionsFromExternalParticipants
+    };
+  }
+
+  /**
+   * Get video URLs from meetings/transcripts
+   * @returns Promise<Array<{ id: string, title: string, video_url: string | null }>>
+   */
+  async getMeetingVideos(): Promise<Array<{ id: string; title: string; video_url: string | null }>> {
+    const query = `
+      query Transcripts {
+        transcripts {
+          id
+          title
+          video_url
+        }
+      }
+    `;
+
+    const response = await this.executeGraphQL<{
+      transcripts: Array<{
+        id: string;
+        title: string;
+        video_url: string | null;
+      }>;
+    }>(query);
+
+    return response.transcripts;
+  }
+
+  /**
+   * Get summary of a specific transcript/meeting
+   * @param transcriptId - ID of the transcript to get summary for
+   * @returns Promise<Summary>
+   */
+  async getTranscriptSummary(transcriptId: string): Promise<Summary> {
+    const query = `
+      query Transcript($transcriptId: String!) {
+        transcript(id: $transcriptId) {
+          summary {
+            keywords
+            action_items
+            outline
+            shorthand_bullet
+            overview
+            bullet_gist
+            gist
+            short_summary
+            short_overview
+            meeting_type
+            topics_discussed
+            transcript_chapters
+          }
+        }
+      }
+    `;
+
+    const response = await this.executeGraphQL<{
+      transcript: {
+        summary: Summary;
+      };
+    }>(query, { transcriptId });
+
+    return response.transcript.summary;
   }
 }
 
