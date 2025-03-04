@@ -240,6 +240,7 @@ npm run build
 ## Credits
 
 - [Haruna Ahmadu](https://github.com/sleemkeen)
+- [Muhammad Abdullah](https://github.com/MrMuhammadAbdullah1704)
 - [All Contributors](../../contributors)
 
 ## License
